@@ -1,16 +1,44 @@
-import { Link } from "react-router-dom"
+import { Link,useLocation, useNavigate} from "react-router-dom"
 import Login from "./Login"
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import toast from "react-hot-toast";
 function Signup() {
+const location = useLocation()
+const Navigate = useNavigate();
+ const from =  location.state?.from?.pathname || "/"
 
-  
+
   const{
     register,
     handleSubmit,
     formState: {errors},
 }=useForm();
 
-const onsubmit = (data) => console.log(data);
+const onsubmit = async(data) => {
+  const userInfo = {
+    fullname:data.fullname,
+    email:data.email,
+    password:data.password,
+  }
+  await axios.post("http://localhost:4000/user/signup",userInfo)
+   .then((res)=>{
+    console.log(res.data);
+
+   if(res.data){
+    toast.success("signup successfully");
+    Navigate(from,{replace:true});
+    
+   }
+   
+   localStorage.setItem("Users",JSON.stringify(res.data.user));
+
+   }).catch((err)=>{
+    if(err.response){
+      toast.error("Error : " + err.response.data.message);
+    }
+   })
+}
 
 
 
@@ -32,10 +60,10 @@ const onsubmit = (data) => console.log(data);
         <input type="name"
         placeholder="Enter Your Full Name"
         className="w-80 py-1 px-3 border rounded-md outline-none"
-        {...register("name", { required: true })}
-        />
+        {...register("fullname", { required: true })}
+        /> 
         <br/>
-        {errors.name && <span className="text-red-600 text-sm ml-3">This field is required</span>}
+        {errors.fullname && <span className="text-red-600 text-sm ml-3">This field is required</span>}
     </div>
     <div className="mt-5 space-y-3">
         <span>Email</span><br></br>
@@ -66,7 +94,7 @@ const onsubmit = (data) => console.log(data);
     </div>
     </form>
   </div>
-
+                   
   </div>
   
         

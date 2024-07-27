@@ -1,5 +1,9 @@
-import { Link } from "react-router-dom"
+import { Link} from "react-router-dom"
 import {useForm} from "react-hook-form"
+import axios from "axios";
+import toast from "react-hot-toast";
+
+
 function Login() {
 
     const{
@@ -8,7 +12,41 @@ function Login() {
         formState: {errors},
     }=useForm();
 
-    const onsubmit = (data) => console.log(data);
+    const onsubmit = async (data) => {
+      const userInfo = {
+        
+        email:data.email,
+        password:data.password,
+      }
+      await axios.post("http://localhost:4000/user/login",userInfo)
+       .then((res)=>{
+        console.log(res.data);
+       if(res.data){
+
+        toast.success("Login successfully");
+        document.getElementById("my_modal_3").close();
+
+        setTimeout(()=>{
+          window.location.reload();
+          localStorage.setItem("Users",JSON.stringify(res.data.user));
+
+
+        },1000)
+        
+
+       }
+    
+       }).catch((err)=>{
+        if(err.response){
+          toast.error("Error : " + err.response.data.message);
+          setTimeout(()=>{
+
+          },2000);
+        }
+       })
+    }
+    
+    
 
 
 
@@ -32,7 +70,7 @@ function Login() {
         <span>Email</span><br></br>
         <input type="email"
         placeholder="Enter Your Email"
-        className="w-80 py-1 px-3 border rounded-md outline-none"
+        className="text-black w-80 py-1 px-3 border rounded-md outline-none"
         {...register("email", { required: true })}
          /><br/>
                {errors.email && <span className="text-red-600 text-sm">This field is required</span>}
@@ -42,7 +80,7 @@ function Login() {
         <span>Password</span><br></br>
         <input type="password"
         placeholder="Enter Your Password"
-        className="w-80 py-1 px-3 border rounded-md outline-none" 
+        className="text-black w-80 py-1 px-3 border rounded-md outline-none" 
         {...register("password", { required: true })}
 /><br/>
      {errors.password && <span className="text-red-600 text-sm ml-3">This field is required</span>}
